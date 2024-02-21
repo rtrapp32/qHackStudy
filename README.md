@@ -1,2 +1,2 @@
-# qHackStudy
-A Simple program to let you optimize your study habits using Q learning for OSCP
+# Q-HackStudy
+ Use Q Learning reinforcment on your own mind. Go forth, Hack,  and get those rewards!
