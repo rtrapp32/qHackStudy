@@ -14,8 +14,16 @@ class QLearning:
 
     def load_or_initialize_q_table(self):
         if os.path.exists(self.filename):
-            return pd.read_csv(self.filename, index_col=0)
+            # Attempt to load the CSV file
+            q_table = pd.read_csv(self.filename, index_col=0)
+            # Check if the loaded table is empty or if it doesn't contain the expected columns
+            if q_table.empty or not all(col in q_table.columns for col in self.actions) or not all(idx in q_table.index for idx in self.states):
+                # Initialize Q-table since the file is empty or corrupted
+                print("Found CSV is empty or not correctly structured. Initializing new Q-table.")
+                q_table = pd.DataFrame(0, index=self.states, columns=self.actions)
+            return q_table
         else:
+            # File doesn't exist, initialize a new Q-table
             q_table = pd.DataFrame(0, index=self.states, columns=self.actions)
             return q_table
 
