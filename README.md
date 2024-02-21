@@ -2,7 +2,7 @@
  Use Q Learning reinforcment on your own mind. Go forth, Hack,  and get those rewards!
 
 This project implements a Q-Learning algorithm to suggest study actions based on the current state. The user can input their current state, such as energy level and exercise status, and the system suggests an appropriate study action using reinforcement learning.
-I was inspired after reading about Skinners "behaviorism" and how it is used to train animals. 
+I was inspired after reading about Skinners "behaviorism" and how it is used to train animals. Humans are animals. Maybe I can optimize my own study habits
 
 ## Overview
 
