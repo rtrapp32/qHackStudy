@@ -37,14 +37,33 @@ function Check-PackageInstallation {
 }
 
 function Start-FlaskApp {
-    $ScriptDirectory = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
-    Set-Location -Path $ScriptDirectory
+    # Use $PSScriptRoot to get the directory of the currently running script
+    $ScriptDirectory = $PSScriptRoot
+
+    # Check if $ScriptDirectory is null or empty
+    if ([string]::IsNullOrWhiteSpace($ScriptDirectory)) {
+        Write-Host "Cannot automatically determine the script's directory." -ForegroundColor Yellow
+        $ScriptDirectory = Read-Host "Please enter the full path to the directory containing your Flask app (e.g., C:\MyFlaskApp)"
+        if ([string]::IsNullOrWhiteSpace($ScriptDirectory)) {
+            Write-Host "No directory was provided. Exiting script." -ForegroundColor Red
+            exit
+        }
+    }
+
+    # Attempt to change the current directory to the script's directory
+    try {
+        Set-Location -Path $ScriptDirectory -ErrorAction Stop
+    } catch {
+        Write-Host "Failed to change directory. The provided path may be incorrect: $ScriptDirectory" -ForegroundColor Red
+        exit
+    }
 
     $Env:FLASK_APP = "app.py"
     Start-Job -ScriptBlock { flask run }
     Start-Sleep -Seconds 2
     Start-Process "http://localhost:5000"
 }
+
 
 function Main {
     Check-PythonInstallation

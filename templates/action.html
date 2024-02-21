@@ -4,52 +4,150 @@
     <meta charset="UTF-8">
     <title>Action Suggestion</title>
     <style>
-        #feedbackForm { display: none; }
-        .timer { font-size: 24px; margin: 20px 0; }
+        body {
+            background-color: #0d1117; /* Dark background for terminal aesthetic */
+            color: #c9d1d9; /* Light text color for contrast */
+            font-family: 'Courier New', Courier, monospace; /* Monospace font for terminal look */
+            padding: 20px;
+        }
+
+        .terminal {
+            background-color: #161b22; /* Slightly lighter dark shade for terminal */
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .terminal p {
+            margin: 0;
+            padding: 5px;
+        }
+
+        .prompt {
+            color: #58a6ff; 
+        }
+
+        .action {
+            color: #ff7b72; /* Light red for action variable to stand out */
+        }
+
+        .clock {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #161b22 60%, #0d1117 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px auto;
+            border: 2px solid #30363d; /* Slight border for depth */
+        }
+
+        .hand, .center-dot {
+            position: absolute;
+            background-color: #58a6ff; /* Matching the prompt color */
+            transform-origin: 50% 100%;
+            border-radius: 2px;
+        }
+
+        .hand {
+            position: absolute;
+            background-color: #58a6ff; /* Matching the prompt color */
+            border-radius: 2px;
+        transform-origin: 50% 100%;
+}
+
+        .hour-hand {
+            width: 8px;
+            height: 60px;
+            transform: translateX(-50%) rotate(90deg);; /* Adjust with JS */
+        }
+
+        .minute-hand {
+            width: 6px;
+            height: 80px;
+            transform: translateX(-50%) rotate(180deg);
+        }
+
+        .second-hand {
+            width: 2px;
+            height: 100px;
+            background-color: #ff7b72; /* Matching the action variable color */
+            transform: translateX(-50%) rotate(270deg);
+        }
+
+        .center-dot {
+            width: 12px;
+            height: 12px;
+            background-color: #58a6ff;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* Center the dot */
+            z-index: 10;
+        }
+
+        .timer {
+            font-size: 17px; /* Adjust as needed */
+            text-align: center;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
-    <h1>Suggested Action: {{ action }}</h1>
-    <div class="timer">Timer: <span id="time"></span> minutes</div>
-    
-    <div id="feedbackForm">
-        <h2>Feedback on Your Session</h2>
-        <form action="/feedback" method="post">
-            <input type="hidden" name="state" value="{{ state }}">
-            <input type="hidden" name="action" value="{{ action }}">
-            <label for="duration">Actual Duration (minutes):</label>
-            <input type="number" name="duration" id="duration" min="0" required>
-            <br>
-            <label for="feeling">Feeling about future study sessions:</label>
-            <select name="feeling" id="feeling">
-                <option value="motivated">Motivated</option>
-                <option value="dread">Dread</option>
-                <option value="indifferent">Indifferent</option>
-            </select>
-            <br>
-            <button type="submit">Submit Feedback</button>
-        </form>
+    <div class="terminal">
+        <p><span class="prompt">root@kali:</span>$<span class="action">Current_Action={{ action }}</span></p>
     </div>
-    
+    <div class="clock">
+        <div class="hand hour-hand" id="hour-hand"></div>
+        <div class="hand minute-hand" id="minute-hand"></div>
+        <div class="hand second-hand" id="second-hand"></div>
+        <div class="center-dot"></div>
+    </div>
+    <div class="timer" id="time">00:00:00</div>
+
     <script>
-        function startTimer(duration) {
-            var timer = duration, display = document.getElementById('time');
-            display.textContent = timer;
-            var countdown = setInterval(function() {
-                timer--;
-                display.textContent = timer;
-                if (timer <= 0) {
-                    clearInterval(countdown);
-                    document.getElementById('feedbackForm').style.display = 'block';
-                }
-            }, 60000); // Update every minute
+        const totalDuration = {{ duration }}; // Duration in seconds from Flask
+        let remainingTime = totalDuration;
+
+        function updateClockHands() {
+            // This simplistic approach updates the hands every second based on the remaining time
+            // A more complex approach would calculate actual time positions for hour, minute, second hands
+            const now = new Date();
+            const seconds = now.getSeconds();
+            const minutes = now.getMinutes();
+            const hours = now.getHours();
+
+            const secondHandRotation = (seconds / 60) * 360;
+            const minuteHandRotation = (minutes / 60) * 360 + (seconds / 60) * 6; // Smooth minute hand movement
+            const hourHandRotation = (hours % 12) / 12 * 360 + (minutes / 60) * 30; // Smooth hour hand movement
+
+            document.getElementById('second-hand').style.transform = `rotate(${secondHandRotation}deg)`;
+            document.getElementById('minute-hand').style.transform = `rotate(${minuteHandRotation}deg)`;
+            document.getElementById('hour-hand').style.transform = `rotate(${hourHandRotation}deg)`;
         }
 
-        window.onload = function () {
-            var duration = {{ duration }}; // Duration from Flask
-            startTimer(duration);
-        };
-    </script>
-    <a href="/">Back</a>
+function updateTimer() {
+    const hours = Math.floor(remainingTime / 3600);
+    const minutes = Math.floor((remainingTime % 3600) / 60);
+    const seconds = remainingTime % 60;
+
+    document.getElementById("time").textContent = 
+        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+    if (remainingTime > 0) {
+        remainingTime--;
+        setTimeout(updateTimer, 1000);
+    } else {
+        // Optional: Redirect or display a message when timer ends
+        window.location.href = "/feedback";
+    }
+}
+
+updateTimer(); // Start the countdown
+setInterval(updateClockHands, 1000); // Start updating clock hands every second
+</script>
 </body>
 </html>

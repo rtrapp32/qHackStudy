@@ -1,0 +1,26 @@
+<!-- feedback_form.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Feedback Form</title>
+</head>
+<body>
+    <h1>Feedback on Your Study Session</h1>
+    <form action="/submit_feedback" method="post">
+        <input type="hidden" name="state" value="{{ state }}">
+        <input type="hidden" name="action" value="{{ action }}">
+        <label for="duration">How long did you study? (minutes):</label>
+        <input type="number" name="duration" id="duration" required>
+        <br>
+        <label for="feeling">How do you feel about future study sessions?</label>
+        <select name="feeling" id="feeling">
+            <option value="motivated">Motivated</option>
+            <option value="dread">Dread</option>
+            <option value="indifferent">Indifferent</option>
+        </select>
+        <br>
+        <button type="submit">Submit Feedback</button>
+    </form>
+</body>
+</html>
